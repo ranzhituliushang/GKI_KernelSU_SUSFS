@@ -47,6 +47,14 @@ on:
           - "123"
           - "345"
         default: "off"
+      artifact_upload_mode:
+        description: "构建产物上传模式"
+        required: true
+        type: choice
+        options:
+          - "仅上传 AnyKernel3.zip"
+          - "上传全部"
+        default: "仅上传 AnyKernel3.zip"
       droidspaces_ntsync:
         description: "启用 Droidspaces 容器 NTSync 支持（需启用 Droidspaces）"
         required: false
@@ -64,6 +72,11 @@ on:
         default: false
       use_rekernel:
         description: "启用 Re-Kernel 驱动"
+        required: false
+        type: boolean
+        default: false
+      cve_2026_43499_patch:
+        description: "应用 CVE-2026-43499 rtmutex 修复链"
         required: false
         type: boolean
         default: false
@@ -97,6 +110,10 @@ on:
         required: false
         type: boolean
         default: false
+      cve_2026_43499_patch:
+        required: false
+        type: boolean
+        default: false
       cancel_susfs:
         required: false
         type: boolean
@@ -104,6 +121,10 @@ on:
         required: false
         type: string
         default: "off"
+      artifact_upload_mode:
+        required: false
+        type: string
+        default: "上传全部"
       droidspaces_ntsync:
         required: false
         type: boolean
@@ -181,10 +202,12 @@ jobs:
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel || false }}
+      cve_2026_43499_patch: ${{ inputs.cve_2026_43499_patch }}
       supp_op: false
       enable_susfs: ${{ !inputs.cancel_susfs }}
       droidspaces: ${{ inputs.droidspaces || 'off' }}
       droidspaces_ntsync: ${{ inputs.droidspaces_ntsync || false }}
+      artifact_upload_mode: ${{ inputs.artifact_upload_mode }}
 
   # 仅在直接触发时运行，从 main.yml 调用时跳过
   get-ksu-manager:

@@ -92,6 +92,10 @@ on:
         description: "启用 Re-Kernel 驱动"
         type: boolean
         default: false
+      cve_2026_43499_patch:
+        description: "应用 CVE-2026-43499 rtmutex 修复链"
+        type: boolean
+        default: false
       cancel_susfs:
         description: "禁用 SUSFS"
         type: boolean
@@ -145,8 +149,10 @@ jobs:
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel }}
+      cve_2026_43499_patch: ${{ inputs.cve_2026_43499_patch }}
       cancel_susfs: ${{ inputs.cancel_susfs }}
       droidspaces: ${{ inputs.droidspaces }}
+      artifact_upload_mode: "上传全部"
       droidspaces_ntsync: ${{ inputs.droidspaces_ntsync }}
       called_from_main: true
 
@@ -163,8 +169,10 @@ jobs:
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel }}
+      cve_2026_43499_patch: ${{ inputs.cve_2026_43499_patch }}
       cancel_susfs: ${{ inputs.cancel_susfs }}
       droidspaces: ${{ inputs.droidspaces }}
+      artifact_upload_mode: "上传全部"
       droidspaces_ntsync: ${{ inputs.droidspaces_ntsync }}
       called_from_main: true
 
@@ -181,8 +189,10 @@ jobs:
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel }}
+      cve_2026_43499_patch: ${{ inputs.cve_2026_43499_patch }}
       cancel_susfs: ${{ inputs.cancel_susfs }}
       droidspaces: ${{ inputs.droidspaces }}
+      artifact_upload_mode: "上传全部"
       droidspaces_ntsync: ${{ inputs.droidspaces_ntsync }}
       called_from_main: true
 
@@ -199,8 +209,10 @@ jobs:
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel }}
+      cve_2026_43499_patch: ${{ inputs.cve_2026_43499_patch }}
       cancel_susfs: ${{ inputs.cancel_susfs }}
       droidspaces: ${{ inputs.droidspaces }}
+      artifact_upload_mode: "上传全部"
       droidspaces_ntsync: ${{ inputs.droidspaces_ntsync }}
       called_from_main: true
 
@@ -217,8 +229,10 @@ jobs:
       use_bbg: ${{ inputs.use_bbg }}
       use_kpm: ${{ inputs.use_kpm }}
       use_rekernel: ${{ inputs.use_rekernel }}
+      cve_2026_43499_patch: ${{ inputs.cve_2026_43499_patch }}
       cancel_susfs: ${{ inputs.cancel_susfs }}
       droidspaces: ${{ inputs.droidspaces }}
+      artifact_upload_mode: "上传全部"
       droidspaces_ntsync: ${{ inputs.droidspaces_ntsync }}
       called_from_main: true
 
@@ -353,7 +367,9 @@ jobs:
 
       # ==================== 检出代码 ====================
       - name: 检出代码
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
 
       # ==================== 确定 KSU 引用 ====================
       # 根据实际构建逻辑确定 KernelSU 上游引用
@@ -571,9 +587,7 @@ jobs:
 
           NEW_TAG=$(echo "$LATEST_TAG" | awk -F'-r' '{suffix=$2; if (!suffix) suffix=0; suffix++; printf "%s-r%d", $1, suffix}')
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-
-          git tag "$NEW_TAG"
-          git push --tags
+          echo "生成标签: $NEW_TAG"
 
       # ==================== 下载构建产物 ====================
       - name: 下载构建产物
@@ -592,6 +606,7 @@ jobs:
           gh release create "$NEW_TAG" \
             --title "$RELEASE_NAME" \
             --notes-file release_body.md \
+            --target "$GITHUB_SHA" \
             $PRERELEASE_FLAG
 
       # ==================== 上传管理器和模块 ====================
